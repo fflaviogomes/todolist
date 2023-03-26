@@ -10,7 +10,8 @@ let doneTodos = JSON.parse(localStorage.getItem('doneTodos')) || [];
 // Render todos in the list
 function renderTodos() {
   todoList.innerHTML = '';
-  for (const todo of todos) {
+  for (let i = 0; i < todos.length; i++) {
+    const todo = todos[i];
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
     const span = document.createElement('span');
@@ -33,6 +34,23 @@ function renderTodos() {
     });
     buttonGroup.appendChild(deleteButton);
     li.appendChild(buttonGroup);
+
+    const upButton = document.createElement('button');
+    upButton.classList.add('btn', 'btn-secondary');
+    upButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    upButton.addEventListener('click', () => {
+      moveUp(i, todos);
+    });
+    buttonGroup.insertBefore(upButton, doneButton);
+
+    const downButton = document.createElement('button');
+    downButton.classList.add('btn', 'btn-secondary');
+    downButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
+    downButton.addEventListener('click', () => {
+      moveDown(i, todos);
+    });
+    buttonGroup.insertBefore(downButton, deleteButton);
+
     todoList.appendChild(li);
   }
 }
@@ -85,10 +103,36 @@ function markAsDone(todo) {
 }
 
 // Delete a todo from the list
-function deleteTodo(todo, list) {
-  const index = list.indexOf(todo);
+function deleteTodo(todo, arr) {
+  const index = arr.indexOf(todo);
   if (index !== -1) {
-    list.splice(index, 1);
+    arr.splice(index, 1);
+    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem('doneTodos', JSON.stringify(doneTodos));
+    renderTodos();
+    renderDoneTodos();
+  }
+}
+
+// Move a todo up in the list
+function moveUp(index, arr) {
+  if (index > 0) {
+    const temp = arr[index - 1];
+    arr[index - 1] = arr[index];
+    arr[index] = temp;
+    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem('doneTodos', JSON.stringify(doneTodos));
+    renderTodos();
+    renderDoneTodos();
+  }
+}
+
+// Move a todo down in the list
+function moveDown(index, arr) {
+  if (index < arr.length - 1) {
+    const temp = arr[index + 1];
+    arr[index + 1] = arr[index];
+    arr[index] = temp;
     localStorage.setItem('todos', JSON.stringify(todos));
     localStorage.setItem('doneTodos', JSON.stringify(doneTodos));
     renderTodos();
@@ -102,6 +146,6 @@ form.addEventListener('submit', (event) => {
   addTodo();
 });
 
-// Render initial todos
+// Render initial todos on page load
 renderTodos();
 renderDoneTodos();
